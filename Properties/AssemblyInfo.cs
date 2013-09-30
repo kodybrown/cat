@@ -14,14 +14,14 @@ using System.Resources;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-[assembly: AssemblyTitle("cat ver:0.9.30929.12")]
+[assembly: AssemblyTitle("cat ver:0.9.30929.4")]
 [assembly: AssemblyDescription("cat")]
 [assembly: AssemblyProduct("cat")]
 [assembly: AssemblyCopyright("Copyright (C) 2003-2013 Kody Brown.")]
 [assembly: ComVisible(false)]
 [assembly: CLSCompliant(false)]
 [assembly: Guid("80C5C00E-280C-49C1-B2FC-4C6B1562CEE6")]
-[assembly: AssemblyVersion("0.9.30929.12")]
-[assembly: AssemblyFileVersion("0.9.30929.12")]
+[assembly: AssemblyVersion("0.9.30929.4")]
+[assembly: AssemblyFileVersion("0.9.30929.4")]
 
 

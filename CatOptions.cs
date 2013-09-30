@@ -75,7 +75,9 @@ namespace cat
 		public static void showUsage()
 		{
 			Console.WriteLine("cat.exe");
-			Console.WriteLine("displays the contents of the file specified.");
+			Console.WriteLine("Displays the contents of the file(s) specified.");
+			Console.WriteLine("Released with an MIT License.");
+			Console.WriteLine("See: https://github.com/kodybrown/cat");
 			Console.WriteLine();
 			Console.WriteLine("USAGE: cat [options] file [file2] [file..n]");
 			Console.WriteLine();
