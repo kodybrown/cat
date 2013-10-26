@@ -61,6 +61,11 @@ namespace cat
 				return 0;
 			}
 
+			if (catOptions.showEnvVars) {
+				catOptions.displayEnvVars();
+				return 0;
+			}
+
 			if (catOptions.files.Count == 0) {
 				Console.WriteLine("ERROR: No file was specified.\n");
 				catOptions.displayUsage();

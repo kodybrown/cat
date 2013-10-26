@@ -37,10 +37,13 @@ namespace cat
 		public ConsoleColor lineNumBackColor { get; set; }
 		public ConsoleColor lineNumForeColor { get; set; }
 
+		public string appname = "cat";
+
 		public List<string> files { get; set; }
 
 		public bool showHelp { get; set; }
 		public bool showPlugins { get; set; }
+		public bool showEnvVars { get; set; }
 
 		public bool showLineNumbers { get; set; }
 		public bool wrapText { get; set; }
@@ -58,8 +61,11 @@ namespace cat
 
 		public CatOptions()
 		{
+			appname = Path.GetFileNameWithoutExtension(Assembly.GetEntryAssembly().Location);
+
 			showHelp = false;
 			showPlugins = false;
+			showEnvVars = false;
 
 			defaultBackColor = Console.BackgroundColor;
 			defaultForeColor = Console.ForegroundColor;
@@ -80,17 +86,17 @@ namespace cat
 			ignoreWhitespaceLines = false;
 
 			normalExpanded = true;
-			extraExpanded = false;
+			extraExpanded = true; // false
 		}
 
 		public void displayHeader()
 		{
 			int width = Console.WindowWidth;
 
-			//Console.WriteLine("cat.exe");
-			//Console.WriteLine(Text.Wrap("cat.exe - Displays the contents of the file(s) specified.", width, 0));
+			//Console.WriteLine(appname + ".exe");
+			//Console.WriteLine(Text.WrapIf(wrapText,appname + ".exe - Displays the contents of the file(s) specified.", width, 0));
 			Console.WriteLine(Text.Wrap("Created by Kody Brown (kody@bricksoft.com)", width, 0));
-			//Console.WriteLine(Text.Wrap("Released under the MIT License. https://github.com/kodybrown/cat", width, 0));
+			//Console.WriteLine(Text.WrapIf(wrapText,"Released under the MIT License. https://github.com/kodybrown/cat", width, 0));
 			Console.WriteLine(Text.Wrap("https://github.com/kodybrown/cat", width, 0));
 			Console.WriteLine();
 		}
@@ -111,7 +117,7 @@ namespace cat
 
 			Console.WriteLine("USAGE:");
 			if (extraExpanded) { Console.WriteLine(); }
-			Console.WriteLine(Text.Wrap("cat [options] file [file...n]", width, ind));
+			Console.WriteLine(Text.Wrap(appname + ".exe [options] file [file...n]", width, ind));
 			if (normalExpanded) { Console.WriteLine(); }
 			Console.WriteLine(Text.Wrap("file      The name of the file to display. Enclose file names within quotes if it includes a space.", width, ind, ind2));
 			if (normalExpanded) { Console.WriteLine(); }
@@ -127,29 +133,31 @@ namespace cat
 			if (normalExpanded) { Console.WriteLine(); }
 			Console.WriteLine(Text.Wrap("-f        Forces plain text display (ignores plugins).", width, ind, ind2));
 			if (normalExpanded) { Console.WriteLine(); }
-			//Console.WriteLine(Text.Wrap("* Enclose file names within quotes if it includes a space.", width, ind, ind + 2));
+			//Console.WriteLine(Text.WrapIf(wrapText,"* Enclose file names within quotes if it includes a space.", width, ind, ind + 2));
 			Console.WriteLine(Text.Wrap("* You can reverse the effect of a flag, by prefixing it with a bang (!). This is useful when you need to override an environment variable.", width, ind, ind + 2));
 			if (normalExpanded) { Console.WriteLine(); }
 			Console.WriteLine("PLUGINS:");
 			if (extraExpanded) { Console.WriteLine(); }
 			Console.WriteLine(Text.Wrap("--show-plugins    Displays all plugins that are available.", width, ind, ind2b));
 			if (normalExpanded) { Console.WriteLine(); }
-			Console.WriteLine(Text.Wrap("Plugins must be in the same directory as cat.exe and must match the file pattern: `cat.*.dll`. See https://github.com/kodybrown/cat for more details.", width, 2));
+			Console.WriteLine(Text.Wrap(string.Format("Plugins must be in the same directory as {0}.exe and must match the file pattern: `{0}.*.dll`. See https://github.com/kodybrown/cat for more details.", appname), width, 2));
 			if (normalExpanded) { Console.WriteLine(); }
 			Console.WriteLine("ENVIRONMENT VARIABLES:");
 			if (extraExpanded) { Console.WriteLine(); }
-			Console.WriteLine(Text.Wrap("These values can be set in your environment so you don't have to type them into the command-line every time you run `cat.exe`.", width, ind));
+			Console.WriteLine(Text.Wrap("--show-envars     Displays all environment variables.", width, ind, ind2b));
+			if (extraExpanded) { Console.WriteLine(); }
+			Console.WriteLine(Text.Wrap(string.Format("These values can be set in your environment so you don't have to type them into the command-line every time you run `{0}.exe`.", appname), width, ind));
 			if (normalExpanded) { Console.WriteLine(); }
-			Console.WriteLine(Text.Wrap("To set a value, prefix the (short) command-line argument name with `cat`. The values are the same as you would use for the command-line.", width, ind));
+			Console.WriteLine(Text.Wrap(string.Format("To set a value, prefix the (short) command-line argument name with `{0}`. The values are the same as you would use for the command-line.", appname), width, ind));
 			if (normalExpanded) { Console.WriteLine(); }
 			Console.WriteLine("  Examples:");
 			if (extraExpanded) { Console.WriteLine(); }
-			Console.WriteLine("    > SET cat_l=true");
-			Console.WriteLine("    > SET cat_w=true");
-			Console.WriteLine("    > SET cat_ib=true");
-			Console.WriteLine("    > SET cat_ibw=true");
-			Console.WriteLine("    > SET cat_il=xyz");
-			Console.WriteLine("    > SET cat_f=true");
+			Console.WriteLine("    > SET {0}_l=true", appname);
+			Console.WriteLine("    > SET {0}_w=true", appname);
+			Console.WriteLine("    > SET {0}_ib=true", appname);
+			Console.WriteLine("    > SET {0}_ibw=true", appname);
+			Console.WriteLine("    > SET {0}_il=xyz", appname);
+			Console.WriteLine("    > SET {0}_f=true", appname);
 			if (normalExpanded) { Console.WriteLine(); }
 			Console.WriteLine(Text.Wrap("* Only the examples displayed are considered valid environment variables.", width, ind, ind + ind));
 			Console.WriteLine(Text.Wrap("* Arguments specified on the command-line will always override environment variables.", width, ind, ind + ind));
@@ -173,14 +181,14 @@ namespace cat
 			Console.WriteLine(Text.Wrap("SHOWING AVAILABLE PLUGINS:", width, 0));
 			if (extraExpanded) { Console.WriteLine(); }
 
-			Console.WriteLine(Text.Wrap("Location: " + dir, width, ind + ind, ind + ind + 18));
+			Console.WriteLine(Text.Wrap("Location: " + dir, width, ind, ind + 18));
 
 			files.Add(exe);
 			files.AddRange(Directory.GetFiles(dir, Path.GetFileNameWithoutExtension(Assembly.GetEntryAssembly().Location) + ".*.dll", SearchOption.TopDirectoryOnly));
 
 			foreach (string f in files) {
 				if (normalExpanded) { Console.WriteLine(); }
-				Console.WriteLine(Text.Wrap("" + Path.GetFileName(f), width, ind + ind));
+				Console.WriteLine(Text.Wrap(Path.GetFileName(f), width, ind));
 				if (extraExpanded) { Console.WriteLine(); }
 
 				// Instantiate each assembly and call Initialize on all enabled plugins.
@@ -204,7 +212,7 @@ namespace cat
 						try {
 							driver = Activator.CreateInstance(types[j]) as ICataloger;
 							if (driver != null) {
-								Console.WriteLine(Text.Wrap("" + driver.GetType().Name + ": " + driver.Description, width, ind + ind + ind));
+								Console.WriteLine(Text.Wrap(driver.GetType().Name + ": " + driver.Description, width, ind + ind));
 							}
 						} catch (Exception ex) {
 							Console.WriteLine(ex.Message);
@@ -217,17 +225,57 @@ namespace cat
 			if (normalExpanded) { Console.WriteLine(); }
 		}
 
+		public void displayEnvVars()
+		{
+			int width = Console.WindowWidth,
+				ind = 2,
+				pad = (appname + "_ibw").Length + 1;
+			
+			displayUsage();
+
+			Console.WriteLine(Text.Wrap("SHOWING ENVIRONMENT VARIABLES:", width, 0));
+			if (extraExpanded) { Console.WriteLine(); }
+
+			displayBoolEnvVar(appname + "_l", pad, width, ind);
+			displayBoolEnvVar(appname + "_w", pad, width, ind);
+			displayBoolEnvVar(appname + "_ib", pad, width, ind);
+			displayBoolEnvVar(appname + "_ibw", pad, width, ind);
+			displayStringEnvVar(appname + "_il", pad, width, ind);
+			displayBoolEnvVar(appname + "_f", pad, width, ind);
+
+			if (normalExpanded) { Console.WriteLine(); }
+		}
+
+		private void displayBoolEnvVar( string varname, int pad, int width, int ind )
+		{
+			if (EnvironmentVariables.Contains(varname)) {
+				Console.WriteLine(Text.Wrap(string.Format("{0,-" + pad + "} = {1}", varname, EnvironmentVariables.GetBoolean(varname).ToString().ToLower()), width, ind));
+			} else {
+				Console.WriteLine(Text.Wrap(string.Format("{0,-" + pad + "} = <not set>", varname), width, ind));
+			}
+		}
+
+		private void displayStringEnvVar( string varname, int pad, int width, int ind )
+		{
+			if (EnvironmentVariables.Contains(varname)) {
+				Console.WriteLine(Text.Wrap(string.Format("{0,-" + pad + "} = '{1}'", varname, EnvironmentVariables.GetString(varname)), width, ind));
+			} else {
+				Console.WriteLine(Text.Wrap(string.Format("{0,-" + pad + "} = <not set>", varname), width, ind));
+			}
+		}
+
 		public static CatOptions LoadOptions( string[] arguments )
 		{
 			CatOptions catOptions;
+			string appname;
 
 			catOptions = new CatOptions();
-
-			catOptions.extraExpanded = false;
-			catOptions.normalExpanded = true;
+			appname = catOptions.appname;
 
 			// TODO Load the environment variables..
-
+			if (EnvironmentVariables.Contains(appname + "_l")) {
+				catOptions.showLineNumbers = EnvironmentVariables.GetBoolean(appname + "_l");
+			}
 
 			// Load the command-line arguments..
 			foreach (string a in arguments) {
@@ -262,7 +310,8 @@ namespace cat
 					} else if (arg.StartsWith("w", StringComparison.CurrentCultureIgnoreCase)) {
 						// w, wrap, wrap-lines
 						catOptions.wrapText = true;
-					} else if (arg.StartsWith("!w", StringComparison.CurrentCultureIgnoreCase)) {
+					} else if (arg.StartsWith("!w", StringComparison.CurrentCultureIgnoreCase) || arg.Equals("no-wrap", StringComparison.CurrentCultureIgnoreCase)) {
+						// !w, !wrap, !wrap-lines, no-wrap
 						catOptions.wrapText = false;
 
 					} else if (arg.StartsWith("f", StringComparison.CurrentCultureIgnoreCase)) {
@@ -301,11 +350,11 @@ namespace cat
 					} else if (arg.Equals("!expanded", StringComparison.CurrentCultureIgnoreCase)) {
 						catOptions.extraExpanded = false;
 
-					} else if (arg.Equals("no-wrap", StringComparison.CurrentCultureIgnoreCase)) {
-						catOptions.wrapText = false;
-
-					} else if (arg.Equals("show-plugins", StringComparison.CurrentCultureIgnoreCase)) {
+					} else if (arg.StartsWith("show-pl", StringComparison.CurrentCultureIgnoreCase)) {
 						catOptions.showPlugins = true;
+
+					} else if (arg.StartsWith("show-env", StringComparison.CurrentCultureIgnoreCase)) {
+						catOptions.showEnvVars = true;
 
 					}
 				} else {
