@@ -36,11 +36,6 @@ namespace cat
 
 		public static int Main( string[] arguments )
 		{
-			if (arguments.Length == 0) {
-				CatOptions.showUsage();
-				return 0;
-			}
-
 			CatOptions catOptions;
 			PlainText textHandler;
 			bool foundIt;
@@ -50,14 +45,25 @@ namespace cat
 			LoadPlugins();
 
 			catOptions = CatOptions.LoadOptions(arguments);
+
+			if (arguments.Length == 0) {
+				catOptions.displayUsage();
+				return 0;
+			}
+
 			if (catOptions.showHelp) {
-				CatOptions.showUsage();
+				catOptions.displayUsage();
+				return 0;
+			}
+
+			if (catOptions.showPlugins) {
+				catOptions.displayPlugins();
 				return 0;
 			}
 
 			if (catOptions.files.Count == 0) {
-				Console.WriteLine("No file was specified.");
-				CatOptions.showUsage();
+				Console.WriteLine("ERROR: No file was specified.\n");
+				catOptions.displayUsage();
 				return 1;
 			}
 

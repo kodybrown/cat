@@ -31,6 +31,9 @@ namespace cat
 	//[ExportMetadata("Extension", '*')]
 	public class PlainText : ICataloger
 	{
+		public string Description { get { return _description; } }
+		private string _description = "Output plain-text without any formatting.";
+
 		public bool CanCat( CatOptions catOptions, string fileName )
 		{
 			return true;
@@ -46,7 +49,7 @@ namespace cat
 			int lineNumber;
 			int padLen;
 			int winWidth = Console.WindowWidth - 1;
-			string l;
+			string l, lt;
 
 			lineStart = Math.Max(lineStart, 0);
 			lineNumber = 0;
@@ -58,6 +61,7 @@ namespace cat
 			using (StreamReader reader = File.OpenText(fileName)) {
 				while (!reader.EndOfStream) {
 					l = reader.ReadLine();
+					lt = l.Trim();
 					lineNumber++;
 
 					if (lineNumber < lineStart) {
@@ -68,7 +72,7 @@ namespace cat
 						continue;
 					} else if (catOptions.ignoreBlankLines && l.Length == 0) {
 						continue;
-					} else if (catOptions.ignoreWhitespaceLines && l.Trim().Length == 0) {
+					} else if (catOptions.ignoreWhitespaceLines && lt.Length == 0) {
 						continue;
 					}
 
@@ -80,10 +84,14 @@ namespace cat
 						Console.ForegroundColor = catOptions.defaultForeColor;
 					}
 
-					if (catOptions.wrapText) {
-						Console.WriteLine(l.Length > 0 ? Bricksoft.PowerCode.Text.Wrap(l.TrimEnd(), winWidth, 0, padLen) : " ");
+					if (lt.Length > 0) {
+						if (catOptions.wrapText) {
+							Console.WriteLine(Bricksoft.PowerCode.Text.Wrap(l.TrimEnd(), winWidth, 0, padLen));
+						} else {
+							Console.WriteLine(l.TrimEnd());
+						}
 					} else {
-						Console.WriteLine(l.Length > 0 ? l.TrimEnd() : " ");
+						Console.WriteLine("  ");
 					}
 
 					if (lineNumber >= linesToWrite) {
@@ -97,6 +105,7 @@ namespace cat
 			return true;
 		}
 
+#if false
 		public bool CatOld( CatOptions catOptions, string fileName, int lineStartsAt, string[] lines )
 		{
 			int lineNumber;
@@ -135,6 +144,6 @@ namespace cat
 
 			return true;
 		}
-
+#endif
 	}
 }

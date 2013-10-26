@@ -1,7 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 2013
+VisualStudioVersion = 12.0.21005.1
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "cat", "cat.csproj", "{80C5C00E-280C-49C1-B2FC-4C6B1562CEE6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "cat.csv", "..\cat.csv\cat.csv.csproj", "{63FE1513-B06A-4D5D-B814-FC5EF155BE3C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -19,6 +23,12 @@ Global
 		{80C5C00E-280C-49C1-B2FC-4C6B1562CEE6}.Release|Any CPU.Build.0 = Release|Any CPU
 		{80C5C00E-280C-49C1-B2FC-4C6B1562CEE6}.Release|x86.ActiveCfg = Release|x86
 		{80C5C00E-280C-49C1-B2FC-4C6B1562CEE6}.Release|x86.Build.0 = Release|x86
+		{63FE1513-B06A-4D5D-B814-FC5EF155BE3C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{63FE1513-B06A-4D5D-B814-FC5EF155BE3C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{63FE1513-B06A-4D5D-B814-FC5EF155BE3C}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{63FE1513-B06A-4D5D-B814-FC5EF155BE3C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{63FE1513-B06A-4D5D-B814-FC5EF155BE3C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{63FE1513-B06A-4D5D-B814-FC5EF155BE3C}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
