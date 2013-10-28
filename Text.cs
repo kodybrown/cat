@@ -30,7 +30,7 @@ namespace Bricksoft.PowerCode
 	/// <summary>
 	/// Common methods for manipulating text.
 	/// </summary>
-	public static class Text
+	internal static class Text
 	{
 		internal static char[] lineBreaks = new char[] { ' ', '.', ',', '-', ':', ';', '>', '"', ']', '}', '!', '?', ')', '\\', '/' };
 
