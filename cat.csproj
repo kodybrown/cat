@@ -62,6 +62,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CatOptions.cs" />
+    <Compile Include="ConsoleEx.cs" />
     <Compile Include="EnvironmentVariables.cs" />
     <Compile Include="Text.cs" />
     <Compile Include="ICataloger.cs" />

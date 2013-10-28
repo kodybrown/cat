@@ -26,6 +26,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using Bricksoft.DosToys;
 using Bricksoft.PowerCode;
 
 namespace cat
@@ -39,6 +40,7 @@ namespace cat
 
 		public string appname = "cat";
 
+		public bool useStdIn { get; set; }
 		public List<string> files { get; set; }
 
 		public bool showHelp { get; set; }
@@ -120,6 +122,7 @@ namespace cat
 			Console.WriteLine(Text.Wrap(appname + ".exe [options] file [file...n]", width, ind));
 			if (normalExpanded) { Console.WriteLine(); }
 			Console.WriteLine(Text.Wrap("file      The name of the file to display. Enclose file names within quotes if it includes a space.", width, ind, ind2));
+			Console.WriteLine(Text.Wrap("<stdin>   Content can be piped via stdin, as well.", width, ind, ind2));
 			if (normalExpanded) { Console.WriteLine(); }
 			Console.WriteLine(Text.Wrap("-p        Pauses after each screenful (applies -pp).", width, ind, ind2));
 			Console.WriteLine(Text.Wrap("-pp       Pauses at the end.", width, ind, ind2));
@@ -230,7 +233,7 @@ namespace cat
 			int width = Console.WindowWidth,
 				ind = 2,
 				pad = (appname + "_ibw").Length + 1;
-			
+
 			displayUsage();
 
 			Console.WriteLine(Text.Wrap("SHOWING ENVIRONMENT VARIABLES:", width, 0));
@@ -272,9 +275,26 @@ namespace cat
 			catOptions = new CatOptions();
 			appname = catOptions.appname;
 
+			catOptions.useStdIn = ConsoleEx.IsInputRedirected;
+
 			// TODO Load the environment variables..
 			if (EnvironmentVariables.Contains(appname + "_l")) {
 				catOptions.showLineNumbers = EnvironmentVariables.GetBoolean(appname + "_l");
+			}
+			if (EnvironmentVariables.Contains(appname + "_w")) {
+				catOptions.wrapText = EnvironmentVariables.GetBoolean(appname + "_w");
+			}
+			if (EnvironmentVariables.Contains(appname + "_ib")) {
+				catOptions.ignoreBlankLines = EnvironmentVariables.GetBoolean(appname + "_ib");
+			}
+			if (EnvironmentVariables.Contains(appname + "_ibw")) {
+				catOptions.ignoreWhitespaceLines = EnvironmentVariables.GetBoolean(appname + "_ibw");
+			}
+			if (EnvironmentVariables.Contains(appname + "_il")) {
+				catOptions.ignoreLines = EnvironmentVariables.GetString(appname + "_il");
+			}
+			if (EnvironmentVariables.Contains(appname + "_f")) {
+				catOptions.forcePlainText = EnvironmentVariables.GetBoolean(appname + "_f");
 			}
 
 			// Load the command-line arguments..
@@ -340,14 +360,21 @@ namespace cat
 					} else if (arg.StartsWith("ignore-lines:", StringComparison.CurrentCultureIgnoreCase)) {
 						catOptions.ignoreLines = arg.Substring(13);
 
-					} else if (arg.Equals("expanded2", StringComparison.CurrentCultureIgnoreCase)) {
+					} else if (arg.Equals("expand", StringComparison.CurrentCultureIgnoreCase) || arg.Equals("!compress", StringComparison.CurrentCultureIgnoreCase)) {
 						catOptions.normalExpanded = true;
-					} else if (arg.Equals("!expanded2", StringComparison.CurrentCultureIgnoreCase)) {
+						catOptions.extraExpanded = true;
+					} else if (arg.Equals("!expand", StringComparison.CurrentCultureIgnoreCase) || arg.Equals("compress", StringComparison.CurrentCultureIgnoreCase)) {
+						catOptions.normalExpanded = false;
+						catOptions.extraExpanded = false;
+
+					} else if (arg.StartsWith("normal", StringComparison.CurrentCultureIgnoreCase)) {
+						catOptions.normalExpanded = true;
+					} else if (arg.StartsWith("!normal", StringComparison.CurrentCultureIgnoreCase)) {
 						catOptions.normalExpanded = false;
 
-					} else if (arg.Equals("expanded", StringComparison.CurrentCultureIgnoreCase)) {
+					} else if (arg.StartsWith("extra", StringComparison.CurrentCultureIgnoreCase)) {
 						catOptions.extraExpanded = true;
-					} else if (arg.Equals("!expanded", StringComparison.CurrentCultureIgnoreCase)) {
+					} else if (arg.StartsWith("!extra", StringComparison.CurrentCultureIgnoreCase)) {
 						catOptions.extraExpanded = false;
 
 					} else if (arg.StartsWith("show-pl", StringComparison.CurrentCultureIgnoreCase)) {

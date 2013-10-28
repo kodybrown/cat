@@ -66,10 +66,17 @@ namespace cat
 				return 0;
 			}
 
-			if (catOptions.files.Count == 0) {
-				Console.WriteLine("ERROR: No file was specified.\n");
+			if (catOptions.files.Count == 0 && !catOptions.useStdIn) {
+				Console.WriteLine("ERROR: No file was specified (and nothing in stdin).\n");
 				catOptions.displayUsage();
 				return 1;
+			}
+
+			if (catOptions.useStdIn) {
+				string f = Path.GetTempFileName();
+				File.WriteAllText(f, Console.In.ReadToEnd());
+				catOptions.files.Clear();
+				catOptions.files.Add(f);
 			}
 
 			foreach (string file in catOptions.files) {
