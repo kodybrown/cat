@@ -26,7 +26,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using Bricksoft.DosToys;
 using Bricksoft.PowerCode;
 
 namespace cat
@@ -103,6 +102,17 @@ namespace cat
 			Console.WriteLine();
 		}
 
+		public void displaySynopsis()
+		{
+			int width = Console.WindowWidth,
+				ind = 2;
+
+			Console.WriteLine("SYNOPSIS:");
+			if (extraExpanded) { Console.WriteLine(); }
+			Console.WriteLine(Text.Wrap("Displays the contents of the file(s) specified.", width, ind));
+			if (normalExpanded) { Console.WriteLine(); }
+		}
+
 		public void displayUsage()
 		{
 			int width = Console.WindowWidth,
@@ -111,11 +121,7 @@ namespace cat
 				ind2b = 20;
 
 			displayHeader();
-
-			Console.WriteLine("SYNOPSIS:");
-			if (extraExpanded) { Console.WriteLine(); }
-			Console.WriteLine(Text.Wrap("Displays the contents of the file(s) specified.", width, ind));
-			if (normalExpanded) { Console.WriteLine(); }
+			displaySynopsis();
 
 			Console.WriteLine("USAGE:");
 			if (extraExpanded) { Console.WriteLine(); }
@@ -179,7 +185,8 @@ namespace cat
 			ICataloger driver;
 			List<Type> types;
 
-			displayUsage();
+			displayHeader();
+			//displaySynopsis();
 
 			Console.WriteLine(Text.Wrap("SHOWING AVAILABLE PLUGINS:", width, 0));
 			if (extraExpanded) { Console.WriteLine(); }
@@ -275,7 +282,7 @@ namespace cat
 			catOptions = new CatOptions();
 			appname = catOptions.appname;
 
-			catOptions.useStdIn = ConsoleEx.IsInputRedirected;
+			catOptions.useStdIn = StdInEx.IsInputRedirected;
 
 			// TODO Load the environment variables..
 			if (EnvironmentVariables.Contains(appname + "_l")) {

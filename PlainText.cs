@@ -32,7 +32,7 @@ namespace cat
 	public class PlainText : ICataloger
 	{
 		public string Description { get { return _description; } }
-		private string _description = "Plain-text without any formatting.";
+		private string _description = "Plain-text without any formatting (DEFAULT).";
 
 		public bool CanCat( CatOptions catOptions, string fileName )
 		{
