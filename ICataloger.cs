@@ -26,6 +26,7 @@ namespace cat
 {
 	public interface ICataloger
 	{
+		string Name { get; }
 		string Description { get; }
 
 		bool CanCat( CatOptions catOptions, string fileName );

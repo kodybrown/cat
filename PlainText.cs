@@ -31,6 +31,9 @@ namespace cat
 	//[ExportMetadata("Extension", '*')]
 	public class PlainText : ICataloger
 	{
+		public string Name { get { return _name; } }
+		private string _name = "text";
+
 		public string Description { get { return _description; } }
 		private string _description = "Plain-text without any formatting (DEFAULT).";
 

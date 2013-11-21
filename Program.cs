@@ -87,13 +87,28 @@ namespace cat
 
 				foundIt = false;
 
-				if (!catOptions.forcePlainText) {
+				if (!catOptions.forcePlainText && catOptions.forceSpecificPlugin.Length == 0) {
 					foreach (ICataloger ic in handlers) {
 						if (ic.CanCat(catOptions, file)) {
 							ic.Cat(catOptions, file);
 							foundIt = true;
 							break;
 						}
+					}
+				}
+
+				if (catOptions.forceSpecificPlugin.Length > 0) {
+					foreach (ICataloger ic in handlers) {
+						if (ic.Name.Equals(catOptions.forceSpecificPlugin, StringComparison.CurrentCultureIgnoreCase)) {
+							ic.Cat(catOptions, file);
+							foundIt = true;
+							break;
+						}
+					}
+
+					if (!foundIt) {
+						Console.WriteLine("Could not find the specified plugin..");
+						return 1;
 					}
 				}
 

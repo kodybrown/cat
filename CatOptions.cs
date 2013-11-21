@@ -49,6 +49,7 @@ namespace cat
 		public bool showLineNumbers { get; set; }
 		public bool wrapText { get; set; }
 		public bool forcePlainText { get; set; }
+		public string forceSpecificPlugin { get; set; }
 
 		public bool pauseAfterEachPage { get; set; }
 		public bool pauseAtEnd { get; set; }
@@ -78,6 +79,7 @@ namespace cat
 			showLineNumbers = false;
 			wrapText = false;
 			forcePlainText = false;
+			forceSpecificPlugin = "";
 
 			pauseAfterEachPage = false;
 			pauseAtEnd = false;
@@ -141,6 +143,8 @@ namespace cat
 			Console.WriteLine(Text.Wrap("-il:xyz   Ignore lines starting with 'xyz'.", width, ind, ind2));
 			if (normalExpanded) { Console.WriteLine(); }
 			Console.WriteLine(Text.Wrap("-f        Forces plain text display (ignores plugins).", width, ind, ind2));
+			Console.WriteLine(Text.Wrap("-force-plugin:name", width, ind, ind2));
+			Console.WriteLine(Text.Wrap("          Forces the plugin 'name' whether the plugin is registered for that file type or not.", width, ind, ind2));
 			if (normalExpanded) { Console.WriteLine(); }
 			//Console.WriteLine(Text.WrapIf(wrapText,"* Enclose file names within quotes if it includes a space.", width, ind, ind + 2));
 			Console.WriteLine(Text.Wrap("* You can reverse the effect of a flag, by prefixing it with a bang (!). This is useful when you need to override an environment variable.", width, ind, ind + 2));
@@ -303,6 +307,9 @@ namespace cat
 			if (EnvironmentVariables.Contains(appname + "_f")) {
 				catOptions.forcePlainText = EnvironmentVariables.GetBoolean(appname + "_f");
 			}
+			if (EnvironmentVariables.Contains(appname + "_forcePlugin")) {
+				catOptions.forceSpecificPlugin = EnvironmentVariables.GetString(appname + "_forcePlugin");
+			}
 
 			// Load the command-line arguments..
 			foreach (string a in arguments) {
@@ -340,6 +347,11 @@ namespace cat
 					} else if (arg.StartsWith("!w", StringComparison.CurrentCultureIgnoreCase) || arg.Equals("no-wrap", StringComparison.CurrentCultureIgnoreCase)) {
 						// !w, !wrap, !wrap-lines, no-wrap
 						catOptions.wrapText = false;
+
+					} else if (arg.StartsWith("force-plugin:", StringComparison.CurrentCultureIgnoreCase)) {
+						catOptions.forceSpecificPlugin = arg.Substring(13);
+					} else if (arg.StartsWith("!force-plugin:", StringComparison.CurrentCultureIgnoreCase)) {
+						catOptions.forceSpecificPlugin = "";
 
 					} else if (arg.StartsWith("f", StringComparison.CurrentCultureIgnoreCase)) {
 						// f, force, force-text, force-plain-text
