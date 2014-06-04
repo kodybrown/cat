@@ -89,7 +89,11 @@ namespace cat
 
 					if (lt.Length > 0) {
 						if (catOptions.wrapText) {
-							Console.WriteLine(Bricksoft.PowerCode.Text.Wrap(l.TrimEnd(), winWidth, 0, padLen));
+							if (catOptions.indentCharacters > 0) {
+								Console.WriteLine(Bricksoft.PowerCode.Text.Wrap(l.TrimEnd(), winWidth, 0, catOptions.indentCharacters));
+							} else {
+								Console.WriteLine(Bricksoft.PowerCode.Text.Wrap(l.TrimEnd(), winWidth, 0, padLen));
+							}
 						} else {
 							Console.WriteLine(l.TrimEnd());
 						}

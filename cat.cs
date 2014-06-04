@@ -27,22 +27,17 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 
 namespace cat
 {
-	public class Program
+	public class cat
 	{
 		public static List<ICataloger> handlers;
 
 		public static int Main( string[] arguments )
 		{
 			CatOptions catOptions;
-			PlainText textHandler;
-			bool foundIt;
-
-			textHandler = new PlainText();
-
-			LoadPlugins();
 
 			catOptions = CatOptions.LoadOptions(arguments);
 
@@ -72,6 +67,25 @@ namespace cat
 				return 1;
 			}
 
+			return new cat().run(catOptions);
+		}
+
+		public cat()
+		{
+
+		}
+
+		public int run( CatOptions catOptions )
+		{
+			//Thread.Sleep(10000);
+
+			PlainText textHandler;
+			bool foundIt;
+
+			textHandler = new PlainText();
+
+			LoadPlugins();
+
 			if (catOptions.useStdIn) {
 				string f = Path.GetTempFileName();
 				File.WriteAllText(f, Console.In.ReadToEnd());
@@ -79,14 +93,35 @@ namespace cat
 				catOptions.files.Add(f);
 			}
 
-			foreach (string file in catOptions.files) {
+			for (int i = 0; i < catOptions.files.Count; i++) {
+				string file = catOptions.files[i];
+
+				// filename standardization / prepping..
+				char ps = Path.DirectorySeparatorChar;
+				char ops = (ps == '/') ? '\\' : '/';
+
+				while (file.IndexOf(ops) > -1) {
+					file = file.Replace(ops, ps);
+				}
+				if (file.StartsWith("~" + ps) || file.StartsWith(ps + "~" + ps)) {
+					if (ps == '\\') {
+						file = "%UserProfile%" + Path.DirectorySeparatorChar + file.Substring(file.IndexOf("~" + ps) + 2);
+					} else {
+						file = "~" + Path.DirectorySeparatorChar + file.Substring(file.IndexOf("~" + ps) + 2);
+					}
+				}
+				if (file.IndexOf("%") > -1) {
+					file = Environment.ExpandEnvironmentVariables(file);
+				}
+
 				if (!File.Exists(file)) {
-					Console.WriteLine("File was not found: " + Path.GetFileName(file));
+					Console.WriteLine("cat.exe: File was not found: " + file);
 					continue;
 				}
 
 				foundIt = false;
 
+				// Try to use automatic selection (via plugin.CanCat())
 				if (!catOptions.forcePlainText && catOptions.forceSpecificPlugin.Length == 0) {
 					foreach (ICataloger ic in handlers) {
 						if (ic.CanCat(catOptions, file)) {
@@ -97,6 +132,7 @@ namespace cat
 					}
 				}
 
+				// Try to use the specified plugin (matching plugin.Name)
 				if (catOptions.forceSpecificPlugin.Length > 0) {
 					foreach (ICataloger ic in handlers) {
 						if (ic.Name.Equals(catOptions.forceSpecificPlugin, StringComparison.CurrentCultureIgnoreCase)) {
@@ -105,13 +141,14 @@ namespace cat
 							break;
 						}
 					}
-
 					if (!foundIt) {
-						Console.WriteLine("Could not find the specified plugin..");
-						return 1;
+						Console.WriteLine("cat.exe: Could not find the specified plugin: " + catOptions.forceSpecificPlugin);
+						//return 1;
 					}
 				}
 
+				// If automatic didn't work and there wasn't a specificed plugin (or it failed),
+				// use the default PlainText plugin.
 				if (!foundIt) {
 					textHandler.Cat(catOptions, file);
 				}
@@ -130,11 +167,16 @@ namespace cat
 			handlers = new List<ICataloger>();
 
 			files = new List<string>();
-			files.AddRange(Directory.GetFiles(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)
-					, Path.GetFileNameWithoutExtension(Assembly.GetEntryAssembly().Location) + ".*.dll", SearchOption.TopDirectoryOnly));
+
+			//Console.WriteLine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
+			//Console.WriteLine(Path.GetFileNameWithoutExtension(Assembly.GetExecutingAssembly().Location));
+			files.AddRange(Directory.GetFiles(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), Path.GetFileNameWithoutExtension(Assembly.GetExecutingAssembly().Location) + ".*.dll", SearchOption.TopDirectoryOnly));
+			//Console.WriteLine("plugin file count: " + files.Count);
 
 			// Instantiate each assembly and call Initialize on all enabled plugins.
 			foreach (string f in files) {
+				//Console.WriteLine("found file: " + f);
+
 				try {
 					driver_module = Assembly.LoadFile(f);
 				} catch (Exception) {
@@ -155,6 +197,7 @@ namespace cat
 						try {
 							driver = Activator.CreateInstance(types[j]) as ICataloger;
 							if (driver != null) {
+								//Console.WriteLine("found plugin: " + driver.Name);
 								handlers.Add(driver);
 							}
 						} catch (Exception ex) {

@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 
 // Original source:
 // http://stackoverflow.com/questions/3453220/how-to-detect-if-console-in-stdin-has-been-redirected/3453272#3453272
-public class StdInEx
+internal class StdInEx
 {
 	private static List<DeleteFileWhenDone> _deleteFiles = new List<DeleteFileWhenDone>();
 

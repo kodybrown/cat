@@ -32,6 +32,9 @@ namespace cat
 {
 	public class CatOptions
 	{
+		//private Config config = null;
+		private static EnvironmentVariables envars = null;
+
 		public ConsoleColor defaultBackColor { get; set; }
 		public ConsoleColor defaultForeColor { get; set; }
 		public ConsoleColor lineNumBackColor { get; set; }
@@ -58,11 +61,15 @@ namespace cat
 		public bool ignoreBlankLines { get; set; }
 		public bool ignoreWhitespaceLines { get; set; }
 
+		public int indentCharacters { get; set; }
+
 		public bool normalExpanded { get; set; }
 		public bool extraExpanded { get; set; }
 
 		public CatOptions()
 		{
+			envars = new EnvironmentVariables("cat");
+
 			appname = Path.GetFileNameWithoutExtension(Assembly.GetEntryAssembly().Location);
 
 			showHelp = false;
@@ -87,6 +94,8 @@ namespace cat
 			ignoreLines = "";
 			ignoreBlankLines = false;
 			ignoreWhitespaceLines = false;
+
+			indentCharacters = 0;
 
 			normalExpanded = true;
 			extraExpanded = true; // false
@@ -141,6 +150,8 @@ namespace cat
 			Console.WriteLine(Text.Wrap("-ib       Ignore blank lines.", width, ind, ind2));
 			Console.WriteLine(Text.Wrap("-ibw      Ignore blank and whitespace lines.", width, ind, ind2));
 			Console.WriteLine(Text.Wrap("-il:xyz   Ignore lines starting with 'xyz'.", width, ind, ind2));
+			//if (normalExpanded) { Console.WriteLine(); }
+			Console.WriteLine(Text.Wrap("-i:n      Lines that are wrapped are automatically indented `n` spaces. This affects every line after the first.", width, ind, ind2));
 			if (normalExpanded) { Console.WriteLine(); }
 			Console.WriteLine(Text.Wrap("-f        Forces plain text display (ignores plugins).", width, ind, ind2));
 			Console.WriteLine(Text.Wrap("-force-plugin:name", width, ind, ind2));
@@ -262,8 +273,8 @@ namespace cat
 
 		private void displayBoolEnvVar( string varname, int pad, int width, int ind )
 		{
-			if (EnvironmentVariables.Contains(varname)) {
-				Console.WriteLine(Text.Wrap(string.Format("{0,-" + pad + "} = {1}", varname, EnvironmentVariables.GetBoolean(varname).ToString().ToLower()), width, ind));
+			if (envars.contains(varname)) {
+				Console.WriteLine(Text.Wrap(string.Format("{0,-" + pad + "} = {1}", varname, envars.attr<bool>(varname).ToString().ToLower()), width, ind));
 			} else {
 				Console.WriteLine(Text.Wrap(string.Format("{0,-" + pad + "} = <not set>", varname), width, ind));
 			}
@@ -271,8 +282,8 @@ namespace cat
 
 		private void displayStringEnvVar( string varname, int pad, int width, int ind )
 		{
-			if (EnvironmentVariables.Contains(varname)) {
-				Console.WriteLine(Text.Wrap(string.Format("{0,-" + pad + "} = '{1}'", varname, EnvironmentVariables.GetString(varname)), width, ind));
+			if (envars.contains(varname)) {
+				Console.WriteLine(Text.Wrap(string.Format("{0,-" + pad + "} = '{1}'", varname, envars.attr<string>(varname)), width, ind));
 			} else {
 				Console.WriteLine(Text.Wrap(string.Format("{0,-" + pad + "} = <not set>", varname), width, ind));
 			}
@@ -288,32 +299,32 @@ namespace cat
 
 			catOptions.useStdIn = StdInEx.IsInputRedirected;
 
-			// TODO Load the environment variables..
-			if (EnvironmentVariables.Contains(appname + "_l")) {
-				catOptions.showLineNumbers = EnvironmentVariables.GetBoolean(appname + "_l");
+			// Load the environment variables..
+			if (envars.contains("l")) {
+				catOptions.showLineNumbers = envars.attr<bool>(appname + "_l");
 			}
-			if (EnvironmentVariables.Contains(appname + "_w")) {
-				catOptions.wrapText = EnvironmentVariables.GetBoolean(appname + "_w");
+			if (envars.contains(appname + "_w")) {
+				catOptions.wrapText = envars.attr<bool>(appname + "_w");
 			}
-			if (EnvironmentVariables.Contains(appname + "_ib")) {
-				catOptions.ignoreBlankLines = EnvironmentVariables.GetBoolean(appname + "_ib");
+			if (envars.contains(appname + "_ib")) {
+				catOptions.ignoreBlankLines = envars.attr<bool>(appname + "_ib");
 			}
-			if (EnvironmentVariables.Contains(appname + "_ibw")) {
-				catOptions.ignoreWhitespaceLines = EnvironmentVariables.GetBoolean(appname + "_ibw");
+			if (envars.contains(appname + "_ibw")) {
+				catOptions.ignoreWhitespaceLines = envars.attr<bool>(appname + "_ibw");
 			}
-			if (EnvironmentVariables.Contains(appname + "_il")) {
-				catOptions.ignoreLines = EnvironmentVariables.GetString(appname + "_il");
+			if (envars.contains(appname + "_il")) {
+				catOptions.ignoreLines = envars.attr<string>(appname + "_il");
 			}
-			if (EnvironmentVariables.Contains(appname + "_f")) {
-				catOptions.forcePlainText = EnvironmentVariables.GetBoolean(appname + "_f");
+			if (envars.contains(appname + "_f")) {
+				catOptions.forcePlainText = envars.attr<bool>(appname + "_f");
 			}
-			if (EnvironmentVariables.Contains(appname + "_forcePlugin")) {
-				catOptions.forceSpecificPlugin = EnvironmentVariables.GetString(appname + "_forcePlugin");
+			if (envars.contains(appname + "_forcePlugin")) {
+				catOptions.forceSpecificPlugin = envars.attr<string>(appname + "_forcePlugin");
 			}
 
 			// Load the command-line arguments..
 			foreach (string a in arguments) {
-				if (a.StartsWith("/") || a.StartsWith("-") || a.StartsWith("!")) {
+				if ((a.StartsWith("/") || a.StartsWith("-") || a.StartsWith("!")) && !a.StartsWith("/~/") && !a.StartsWith("/c/")) {
 					string arg = a;
 					while (arg.StartsWith("/") || arg.StartsWith("-")) {
 						arg = arg.Substring(1);
@@ -378,6 +389,26 @@ namespace cat
 						catOptions.ignoreLines = arg.Substring(7);
 					} else if (arg.StartsWith("ignore-lines:", StringComparison.CurrentCultureIgnoreCase)) {
 						catOptions.ignoreLines = arg.Substring(13);
+					} else if (arg.Equals("!ib", StringComparison.CurrentCultureIgnoreCase) || arg.StartsWith("!ignore-b", StringComparison.CurrentCultureIgnoreCase)) {
+						catOptions.ignoreBlankLines = false;
+
+
+					} else if (arg.StartsWith("i:", StringComparison.CurrentCultureIgnoreCase)) {
+						// i:n
+						int val;
+						if (int.TryParse(arg.Substring(2), out val)) {
+							catOptions.indentCharacters = val;
+						} else {
+							Console.WriteLine("Invalid value for `/i`: {0}", arg.Substring(2));
+						}
+					} else if (arg.StartsWith("indent:", StringComparison.CurrentCultureIgnoreCase)) {
+						// indent:n
+						int val;
+						if (int.TryParse(arg.Substring(7), out val)) {
+							catOptions.indentCharacters = val;
+						} else {
+							Console.WriteLine("Invalid value for `/indent`: {0}", arg.Substring(7));
+						}
 
 					} else if (arg.Equals("expand", StringComparison.CurrentCultureIgnoreCase) || arg.Equals("!compress", StringComparison.CurrentCultureIgnoreCase)) {
 						catOptions.normalExpanded = true;
