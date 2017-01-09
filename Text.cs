@@ -1,18 +1,18 @@
 /*!
 	Copyright (C) 2008-2013 Kody Brown (kody@bricksoft.com).
-	
+
 	MIT License:
-	
+
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to
 	deal in the Software without restriction, including without limitation the
 	rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
 	sell copies of the Software, and to permit persons to whom the Software is
 	furnished to do so, subject to the following conditions:
-	
+
 	The above copyright notice and this permission notice shall be included in
 	all copies or substantial portions of the Software.
-	
+
 	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 	IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 	FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -47,7 +47,7 @@ namespace Bricksoft.PowerCode
 		public static string Wrap( string Text, int WrapWidth ) { return Wrap(Text, WrapWidth, 0); }
 
 		/// <summary>
-		/// Wraps the specified <paramref name="Text"/> at <paramref name="WrapWidth"/>, 
+		/// Wraps the specified <paramref name="Text"/> at <paramref name="WrapWidth"/>,
 		/// while indenting each line by <paramref name="Indentations"/> spaces.
 		/// </summary>
 		/// <param name="Text">The text to wrap.</param>
@@ -78,12 +78,10 @@ namespace Bricksoft.PowerCode
 			idIndex = 0;
 			ids = new List<string>(Indentations.Length);
 
-			Func<int> wrapWidthIdx = delegate()
-			{
+			Func<int> wrapWidthIdx = delegate () {
 				return Math.Min(wrapIndex, WrapWidths.Length - 1);
 			};
-			Func<int> identIdx = delegate()
-			{
+			Func<int> identIdx = delegate () {
 				return Math.Min(idIndex, Indentations.Length - 1);
 			};
 
@@ -114,7 +112,7 @@ namespace Bricksoft.PowerCode
 						if (temp.Length > w) {
 							brk = temp.Substring(0, w).LastIndexOfAny(lineBreaks) + 1;
 							if (brk == 0) {
-								// The string could not be broken up nicely, 
+								// The string could not be broken up nicely,
 								// so just cut the line at the wrap width..
 								brk = w;
 							}
